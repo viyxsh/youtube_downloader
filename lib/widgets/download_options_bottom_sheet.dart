@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_downloader/models/video_info.dart';
-import 'package:youtube_downloader/services/youtube_service.dart';
+import 'package:youtube_downloader/services/download_manager.dart';
 import 'package:youtube_downloader/utils/enums.dart';
+import 'package:youtube_downloader/screens/downloads_status_screen.dart';
 
 class DownloadOptionsBottomSheet extends StatefulWidget {
   final VideoInfo videoInfo;
@@ -19,8 +20,7 @@ class DownloadOptionsBottomSheet extends StatefulWidget {
 class _DownloadOptionsBottomSheetState extends State<DownloadOptionsBottomSheet> {
   DownloadType _selectedType = DownloadType.videoWithAudio;
   StreamInfo? _selectedStream;
-  bool _isDownloading = false;
-  double _downloadProgress = 0.0;
+  final DownloadManager _downloadManager = DownloadManager();
 
   @override
   void initState() {
@@ -73,51 +73,55 @@ class _DownloadOptionsBottomSheetState extends State<DownloadOptionsBottomSheet>
     });
   }
 
-  Future<void> _downloadVideo() async {
+  void _showDownloadStartedDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Download Started'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Started downloading: ${widget.videoInfo.title}'),
+            const SizedBox(height: 16),
+            const Text('You can view the download progress in the Downloads screen.'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              Navigator.pop(context); // Close dialog
+              // Navigate to downloads screen
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const DownloadsStatusScreen()),
+              );
+            },
+            child: const Text('View Downloads'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _startDownload() async {
     if (_selectedStream == null) return;
 
-    setState(() {
-      _isDownloading = true;
-      _downloadProgress = 0.0;
-    });
+    final extension = _selectedStream!.container.name;
+    final fileName = '${widget.videoInfo.sanitizedTitle}.$extension';
 
-    try {
-      final extension = _selectedStream!.container.name;
-      final fileName = '${widget.videoInfo.sanitizedTitle}.$extension';
+    _downloadManager.startDownload(
+      widget.videoInfo,
+      _selectedStream!,
+      fileName,
+    );
 
-      await YoutubeService.downloadStream(
-        videoId: widget.videoInfo.id,
-        streamInfo: _selectedStream!,
-        fileName: fileName,
-        onProgress: (progress) {
-          setState(() {
-            _downloadProgress = progress;
-          });
-        },
-      );
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Download completed: $fileName'),
-            backgroundColor: Colors.green,
-          ),
-        );
-        Navigator.pop(context);
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Download failed: ${e.toString()}'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        setState(() {
-          _isDownloading = false;
-        });
-      }
-    }
+    Navigator.pop(context); // Close bottom sheet
+    _showDownloadStartedDialog(); // Show popup instead of snackbar
   }
 
   String _formatFileSize(int bytes) {
@@ -275,32 +279,18 @@ class _DownloadOptionsBottomSheetState extends State<DownloadOptionsBottomSheet>
                 child: Text(_formatStreamInfo(stream)),
               );
             }).toList(),
-            onChanged: _isDownloading ? null : _onStreamChanged,
+            onChanged: _onStreamChanged,
           ),
           const SizedBox(height: 16.0),
-          _isDownloading
-              ? Column(
-            children: [
-              LinearProgressIndicator(
-                value: _downloadProgress,
-                backgroundColor: Colors.grey.shade200,
-              ),
-              const SizedBox(height: 8.0),
-              Text(
-                'Downloading: ${(_downloadProgress * 100).toInt()}%',
-                textAlign: TextAlign.center,
-              ),
-            ],
-          )
-              : ElevatedButton(
-            onPressed: _selectedStream == null ? null : _downloadVideo,
+          ElevatedButton(
+            onPressed: _selectedStream == null ? null : _startDownload,
             style: ElevatedButton.styleFrom(
               padding: const EdgeInsets.symmetric(vertical: 16.0),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(8.0),
               ),
             ),
-            child: const Text('Download'),
+            child: const Text('Start Download'),
           ),
           const SizedBox(height: 16.0),
         ],

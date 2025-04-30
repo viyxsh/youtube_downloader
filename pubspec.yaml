@@ -43,6 +43,10 @@ dependencies:
   dio: ^5.8.0+1
   chewie: ^1.11.3
   cached_network_image: ^3.4.1
+  shared_preferences: ^2.5.3
+  open_file: ^3.5.10
+  url_launcher: ^6.3.1
+  flutter_native_splash: ^2.4.6
 
 dev_dependencies:
   flutter_test:
@@ -59,7 +63,19 @@ dev_dependencies:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
+flutter_native_splash:
+  color: "#1565C0"
+  image: assets/icons/AppIcons/app_icon.png
+  color_dark: "#1565C0"
+  image_dark: assets/icons/AppIcons/app_icon.png
 
+  android_12:
+    image: assets/icons/AppIcons/app_icon.png
+    icon_background_color: "#1565C0"
+    image_dark: assets/icons/AppIcons/app_icon.png
+    icon_background_color_dark: "#1565C0"
+
+  web: false
 # The following section is specific to Flutter packages.
 flutter:
 
@@ -67,6 +83,8 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+  assets:
+    - assets/icons/AppIcons/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

@@ -1,6 +1,8 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:youtube_downloader/models/downloaded_video.dart';
 import 'package:youtube_downloader/services/storage_service.dart';
+import 'package:youtube_downloader/components/components.dart';
+import 'package:open_file/open_file.dart';
 
 class MyVideosTab extends StatefulWidget {
   const MyVideosTab({super.key});
@@ -10,7 +12,7 @@ class MyVideosTab extends StatefulWidget {
 }
 
 class _MyVideosTabState extends State<MyVideosTab> {
-  List<File> _downloadedVideos = [];
+  List<DownloadedVideo> _downloadedVideos = [];
   bool _isLoading = true;
 
   @override
@@ -21,7 +23,7 @@ class _MyVideosTabState extends State<MyVideosTab> {
 
   Future<void> _loadDownloadedVideos() async {
     try {
-      final videos = await StorageService.getDownloadedVideos();
+      final videos = await StorageService.getDownloadedVideoMetadata();
       setState(() {
         _downloadedVideos = videos;
         _isLoading = false;
@@ -40,14 +42,48 @@ class _MyVideosTabState extends State<MyVideosTab> {
     await _loadDownloadedVideos();
   }
 
-  Future<void> _playVideo(File videoFile) async {
-    // Here you would implement video playback functionality
-    // For simplicity, we're just showing a snackbar
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Playing: ${videoFile.path.split('/').last}'),
-      ),
+  Future<void> _playVideo(DownloadedVideo video) async {
+    try {
+      final result = await OpenFile.open(video.file.path);
+
+      if (result.type != ResultType.done && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not open video: ${result.message}'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error opening video: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _confirmDeleteVideo(DownloadedVideo video) async {
+    final result = await ConfirmationDialog.show(
+      context: context,
+      title: 'Delete Video',
+      content: 'Are you sure you want to delete "${video.title}"?',
+      confirmText: 'Delete',
+      confirmColor: Colors.red,
     );
+
+    if (result == true) {
+      final success = await StorageService.deleteVideo(video);
+      if (success && mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Video deleted successfully')),
+        );
+        _refreshVideos();
+      }
+    }
   }
 
   @override
@@ -59,21 +95,11 @@ class _MyVideosTabState extends State<MyVideosTab> {
     }
 
     if (_downloadedVideos.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Text(
-              'No downloaded videos yet',
-              style: TextStyle(fontSize: 16),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: _refreshVideos,
-              child: const Text('Refresh'),
-            ),
-          ],
-        ),
+      return EmptyContentPlaceholder(
+        message: 'No downloaded videos yet',
+        buttonText: 'Refresh',
+        onButtonPressed: _refreshVideos,
+        icon: Icons.video_library,
       );
     }
 
@@ -84,32 +110,11 @@ class _MyVideosTabState extends State<MyVideosTab> {
         itemCount: _downloadedVideos.length,
         itemBuilder: (context, index) {
           final video = _downloadedVideos[index];
-          final fileName = video.path.split('/').last;
 
-          return Card(
-            margin: const EdgeInsets.symmetric(vertical: 8.0),
-            child: ListTile(
-              leading: Container(
-                width: 64,
-                height: 64,
-                color: Colors.grey.shade200,
-                child: const Icon(
-                  Icons.video_file,
-                  color: Colors.grey,
-                  size: 32,
-                ),
-              ),
-              title: Text(
-                fileName,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              subtitle: Text(
-                '${(video.lengthSync() / (1024 * 1024)).toStringAsFixed(2)} MB',
-                style: TextStyle(color: Colors.grey.shade600),
-              ),
-              onTap: () => _playVideo(video),
-            ),
+          return VideoCard(
+            video: video,
+            onTap: () => _playVideo(video),
+            onLongPress: () => _confirmDeleteVideo(video),
           );
         },
       ),

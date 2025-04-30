@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:youtube_downloader/models/video_info.dart';
 import 'package:youtube_downloader/services/youtube_service.dart';
 import 'package:youtube_downloader/widgets/download_options_bottom_sheet.dart';
+import 'package:youtube_downloader/components/components.dart';
+import 'package:youtube_downloader/utils/error_handler.dart';
 
 class DownloadTab extends StatefulWidget {
   const DownloadTab({super.key});
@@ -34,6 +37,7 @@ class _DownloadTabState extends State<DownloadTab> {
   Future<void> _getVideoInfo() async {
     _clearError();
     final url = _urlController.text.trim();
+
     if (url.isEmpty) {
       setState(() {
         _errorMessage = 'Please enter a YouTube URL';
@@ -52,43 +56,89 @@ class _DownloadTabState extends State<DownloadTab> {
       _isLoading = true;
     });
 
-    try {
-      final videoInfo = await YoutubeService.getVideoInfo(url);
-      setState(() {
-        _videoInfo = videoInfo;
-        _isLoading = false;
-      });
+    await ErrorHandler.safeExecute(
+          () async {
+        final videoInfoFuture = YoutubeService.getVideoInfo(url);
 
-      if (_videoInfo != null) {
+        final videoInfo = await videoInfoFuture.timeout(
+          const Duration(seconds: 30),
+          onTimeout: () {
+            throw TimeoutException('Connection timed out. Please try again.');
+          },
+        );
+
+        if (videoInfo == null ||
+            videoInfo.title == null ||
+            videoInfo.thumbnailUrl == null) {
+          throw 'Invalid or incomplete video data received.';
+        }
+
+        setState(() {
+          _videoInfo = videoInfo;
+          _isLoading = false;
+        });
+
         _showDownloadOptions();
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Failed to fetch video information';
-        _isLoading = false;
-      });
-    }
+      },
+          (errorMsg) {
+        debugPrint('Error in _getVideoInfo: $errorMsg');
+
+        setState(() {
+          _videoInfo = null;
+          _errorMessage = errorMsg;
+          _isLoading = false;
+        });
+
+        if (mounted) {
+          ErrorHandler.showErrorSnackBar(context, errorMsg);
+        }
+      },
+    );
   }
 
   void _showDownloadOptions() {
     if (_videoInfo == null) return;
 
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => DownloadOptionsBottomSheet(videoInfo: _videoInfo!),
-    );
+    try {
+      showModalBottomSheet(
+        context: context,
+        isScrollControlled: true,
+        backgroundColor: Colors.transparent,
+        builder: (context) =>
+            DownloadOptionsBottomSheet(videoInfo: _videoInfo!),
+      );
+    } catch (e) {
+      final errorMsg = ErrorHandler.getErrorMessage(e);
+      debugPrint('Error showing bottom sheet: $e');
+
+      setState(() {
+        _errorMessage = errorMsg;
+      });
+
+      if (mounted) {
+        ErrorHandler.showErrorSnackBar(context, errorMsg);
+      }
+    }
   }
 
-  void _pasteFromClipboard() async {
-    final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
-    if (clipboardData != null && clipboardData.text != null) {
-      setState(() {
-        _urlController.text = clipboardData.text!;
-        _clearError();
-      });
-    }
+  Future<void> _pasteFromClipboard() async {
+    await ErrorHandler.safeExecute(
+          () async {
+        final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
+        if (clipboardData?.text != null) {
+          setState(() {
+            _urlController.text = clipboardData!.text!;
+            _clearError();
+          });
+        }
+      },
+          (errorMsg) {
+        debugPrint('Clipboard error: $errorMsg');
+        if (mounted) {
+          ErrorHandler.showErrorSnackBar(context, 'Failed to paste: $errorMsg');
+        }
+      },
+    );
   }
 
   @override
@@ -98,50 +148,16 @@ class _DownloadTabState extends State<DownloadTab> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
-              borderRadius: BorderRadius.circular(8.0),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _urlController,
-                    decoration: const InputDecoration(
-                      hintText: 'YouTube URL',
-                      border: InputBorder.none,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 16.0),
-                    ),
-                    onChanged: (_) => _clearError(),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.content_paste),
-                  onPressed: _pasteFromClipboard,
-                ),
-              ],
-            ),
+          UrlInputField(
+            controller: _urlController,
+            onChanged: _clearError,
+            onPastePressed: _pasteFromClipboard,
           ),
           const SizedBox(height: 16.0),
-          ElevatedButton(
-            onPressed: _isLoading ? null : _getVideoInfo,
-            style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8.0),
-              ),
-            ),
-            child: _isLoading
-                ? const SizedBox(
-              height: 20,
-              width: 20,
-              child: CircularProgressIndicator(
-                color: Colors.white,
-                strokeWidth: 2,
-              ),
-            )
-                : const Text('Get Video Info'),
+          LoadingButton(
+            isLoading: _isLoading,
+            text: 'Get Video Info',
+            onPressed: _getVideoInfo,
           ),
           if (_errorMessage.isNotEmpty) ...[
             const SizedBox(height: 16.0),

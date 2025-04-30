@@ -19,20 +19,20 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
     super.initState();
     _animationController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3000),
+      duration: const Duration(milliseconds: 2500),
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 3.0).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: Interval(0.0, 0.6, curve: Curves.easeInOut),
+        curve: const Interval(0.0, 0.6, curve: Curves.easeInOut),
       ),
     );
 
     _scaleAnimation = Tween<double>(begin: 0.7, end: 1.0).animate(
       CurvedAnimation(
         parent: _animationController,
-        curve: Interval(0.0, 0.6, curve: Curves.easeInOut),
+        curve: const Interval(0.0, 0.6, curve: Curves.easeInOut),
       ),
     );
 
@@ -81,15 +81,15 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
                           ),
                         ],
                       ),
-                      child: Icon(
-                        Icons.download_rounded,
-                        color: const Color(0xFF1565C0),
-                        size: 80,
+                      child: Image.asset(
+                        'assets/icons/AppIcons/appstore.png',
+                        width: 80,
+                        height: 80,
                       ),
                     ),
                     const SizedBox(height: 30),
-                    Text(
-                      'YouTube Downloader',
+                    const Text(
+                      'TubeSaver',
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,

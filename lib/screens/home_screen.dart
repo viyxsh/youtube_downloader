@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:youtube_downloader/screens/download_tab.dart';
 import 'package:youtube_downloader/screens/my_videos_tab.dart';
+import 'package:youtube_downloader/screens/downloads_status_screen.dart';
+import 'package:youtube_downloader/services/download_manager.dart';
+import 'package:youtube_downloader/components/components.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -11,11 +14,30 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   late TabController _tabController;
+  final DownloadManager _downloadManager = DownloadManager();
+  int _activeDownloads = 0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _listenToDownloads();
+  }
+
+  void _listenToDownloads() {
+    _downloadManager.tasksStream.listen((tasks) {
+      setState(() {
+        _activeDownloads = tasks.values.where((task) =>
+        !task.isCompleted && !task.isCancelled && !task.hasError).length;
+      });
+    });
+  }
+
+  void _navigateToDownloadsScreen() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const DownloadsStatusScreen()),
+    );
   }
 
   @override
@@ -34,16 +56,10 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               color: Theme.of(context).primaryColor,
               child: Column(
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 16.0),
-                    child: Text(
-                      'YouTube Downloader',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  CustomAppBar(
+                    title: 'YouTube Downloader',
+                    activeDownloads: _activeDownloads,
+                    onDownloadsTap: _navigateToDownloadsScreen,
                   ),
                   TabBar(
                     controller: _tabController,

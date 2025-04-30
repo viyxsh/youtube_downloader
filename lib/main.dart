@@ -1,18 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:youtube_downloader/screens/splash_screen.dart';
+import 'package:youtube_downloader/theme/theme.dart';
 import 'package:youtube_downloader/utils/app_initialization.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  // This is important: ensure the native splash screen stays visible until we're ready
+  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  // Set preferred orientations
+  // Configure device orientation
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
 
+  // Initialize your app
   await AppInitialization.initializeApp();
+
+  // Now we can remove the native splash screen and start the app
+  FlutterNativeSplash.remove();
+
   runApp(const MyApp());
 }
 
@@ -22,32 +31,9 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'YouTube Downloader',
+      title: 'TubeSaver',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primaryColor: const Color(0xFF1565C0),
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF1565C0),
-          primary: const Color(0xFF1565C0),
-        ),
-        scaffoldBackgroundColor: Colors.white,
-        appBarTheme: const AppBarTheme(
-          backgroundColor: Color(0xFF1565C0),
-          elevation: 0,
-          foregroundColor: Colors.white,
-        ),
-        elevatedButtonTheme: ElevatedButtonThemeData(
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFF1565C0),
-            foregroundColor: Colors.white,
-          ),
-        ),
-        tabBarTheme: const TabBarTheme(
-          indicatorColor: Colors.white,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-        ),
-      ),
+      theme: appTheme,
       home: const SplashScreen(),
     );
   }

@@ -1,8 +1,11 @@
 import 'dart:async';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
+import 'package:youtube_downloader/services/storage_service.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_downloader/models/video_info.dart';
+
+import '../models/downloaded_video.dart';
 
 class YoutubeService {
   static final YoutubeExplode _yt = YoutubeExplode();
@@ -56,6 +59,7 @@ class YoutubeService {
     required String videoId,
     required StreamInfo streamInfo,
     required String fileName,
+    required VideoInfo videoInfo, // Add videoInfo parameter
     required Function(double) onProgress,
   }) async {
     final stream = _yt.videos.streamsClient.get(streamInfo);
@@ -74,6 +78,22 @@ class YoutubeService {
 
     await fileStream.flush();
     await fileStream.close();
+
+    // Save thumbnail and metadata
+    final thumbnailPath = await StorageService.saveThumbnail(
+        videoInfo.thumbnailUrl,
+        videoInfo.id
+    );
+
+    final downloadedVideo = DownloadedVideo(
+      file: file,
+      title: videoInfo.title,
+      author: videoInfo.author,
+      thumbnailPath: thumbnailPath,
+      duration: videoInfo.duration,
+    );
+
+    await StorageService.saveVideoMetadata(downloadedVideo);
 
     return file;
   }
