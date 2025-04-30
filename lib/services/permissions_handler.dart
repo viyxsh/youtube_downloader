@@ -10,15 +10,20 @@ class PermissionsHandler {
 
     final sdkInt = await _getAndroidVersion();
     if (sdkInt >= 30) {
-      var storageStatus = await Permission.storage.request();
-      var manageStatus = await Permission.manageExternalStorage.request();
+      // First request regular storage permission
+      await Permission.storage.request();
 
-      if (!manageStatus.isGranted) {
-        debugPrint('MANAGE_EXTERNAL_STORAGE permission denied');
-        return false;
+      // For Android 11+, we need to check if we have the special permission
+      // and direct users to the system screen if not
+      if (!await Permission.manageExternalStorage.isGranted) {
+        // This will open the special system screen for "All files access"
+        await openAppSettings();
+
+        // After returning from settings, we need to check again
+        // Note: User needs to grant permission manually in settings
+        return await Permission.manageExternalStorage.isGranted;
       }
-
-      return manageStatus.isGranted;
+      return true;
     }
     else {
       var storageStatus = await Permission.storage.request();
