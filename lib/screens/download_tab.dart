@@ -44,6 +44,8 @@ class _DownloadTabState extends State<DownloadTab> {
 
     setState(() {
       _isLoading = true;
+      // Reset video info when starting a new request
+      _videoInfo = null;
     });
 
     await ErrorHandler.safeExecute(
@@ -55,17 +57,20 @@ class _DownloadTabState extends State<DownloadTab> {
           },
         );
 
-        // Only proceed if we have the necessary data
-        if (mounted) {
+        // Only proceed if we have the necessary data and component is still mounted
+        if (mounted && videoInfo != null) {
           setState(() {
             _videoInfo = videoInfo;
             _isLoading = false;
           });
 
-          // Only show download options if we have video info
-          if (_videoInfo != null) {
-            _showDownloadOptions();
-          }
+          // Show download options after state is updated
+          _showDownloadOptions();
+        } else if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+          ErrorHandler.showErrorSnackBar(context, 'Failed to get video information');
         }
       },
           (errorMsg) {
@@ -128,7 +133,7 @@ class _DownloadTabState extends State<DownloadTab> {
         children: [
           UrlInputField(
             controller: _urlController,
-            onChanged: () {}, // Empty function that takes no parameters
+            onChanged: () {}, // Empty function as expected by UrlInputField
             onPastePressed: _pasteFromClipboard,
           ),
           const SizedBox(height: 16.0),
