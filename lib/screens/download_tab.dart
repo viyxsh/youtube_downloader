@@ -16,7 +16,6 @@ class DownloadTab extends StatefulWidget {
 
 class _DownloadTabState extends State<DownloadTab> {
   final TextEditingController _urlController = TextEditingController();
-  String _errorMessage = '';
   bool _isLoading = false;
   VideoInfo? _videoInfo;
 
@@ -26,29 +25,20 @@ class _DownloadTabState extends State<DownloadTab> {
     super.dispose();
   }
 
-  void _clearError() {
-    if (_errorMessage.isNotEmpty) {
-      setState(() {
-        _errorMessage = '';
-      });
-    }
-  }
-
   Future<void> _getVideoInfo() async {
-    _clearError();
     final url = _urlController.text.trim();
 
     if (url.isEmpty) {
-      setState(() {
-        _errorMessage = 'Please enter a YouTube URL';
-      });
+      if (mounted) {
+        ErrorHandler.showErrorSnackBar(context, 'Please enter a YouTube URL');
+      }
       return;
     }
 
     if (!YoutubeService.isValidYoutubeUrl(url)) {
-      setState(() {
-        _errorMessage = 'Please enter a valid YouTube URL';
-      });
+      if (mounted) {
+        ErrorHandler.showErrorSnackBar(context, 'Please enter a valid YouTube URL');
+      }
       return;
     }
 
@@ -58,38 +48,33 @@ class _DownloadTabState extends State<DownloadTab> {
 
     await ErrorHandler.safeExecute(
           () async {
-        final videoInfoFuture = YoutubeService.getVideoInfo(url);
-
-        final videoInfo = await videoInfoFuture.timeout(
+        final videoInfo = await YoutubeService.getVideoInfo(url).timeout(
           const Duration(seconds: 30),
           onTimeout: () {
             throw TimeoutException('Connection timed out. Please try again.');
           },
         );
 
-        if (videoInfo == null ||
-            videoInfo.title == null ||
-            videoInfo.thumbnailUrl == null) {
-          throw 'Invalid or incomplete video data received.';
+        // Only proceed if we have the necessary data
+        if (mounted) {
+          setState(() {
+            _videoInfo = videoInfo;
+            _isLoading = false;
+          });
+
+          // Only show download options if we have video info
+          if (_videoInfo != null) {
+            _showDownloadOptions();
+          }
         }
-
-        setState(() {
-          _videoInfo = videoInfo;
-          _isLoading = false;
-        });
-
-        _showDownloadOptions();
       },
           (errorMsg) {
         debugPrint('Error in _getVideoInfo: $errorMsg');
-
-        setState(() {
-          _videoInfo = null;
-          _errorMessage = errorMsg;
-          _isLoading = false;
-        });
-
         if (mounted) {
+          setState(() {
+            _videoInfo = null;
+            _isLoading = false;
+          });
           ErrorHandler.showErrorSnackBar(context, errorMsg);
         }
       },
@@ -97,26 +82,20 @@ class _DownloadTabState extends State<DownloadTab> {
   }
 
   void _showDownloadOptions() {
-    if (_videoInfo == null) return;
+    // Guard clause to prevent null pointer exception
+    if (_videoInfo == null || !mounted) return;
 
     try {
       showModalBottomSheet(
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (context) =>
-            DownloadOptionsBottomSheet(videoInfo: _videoInfo!),
+        builder: (context) => DownloadOptionsBottomSheet(videoInfo: _videoInfo!),
       );
     } catch (e) {
-      final errorMsg = ErrorHandler.getErrorMessage(e);
       debugPrint('Error showing bottom sheet: $e');
-
-      setState(() {
-        _errorMessage = errorMsg;
-      });
-
       if (mounted) {
-        ErrorHandler.showErrorSnackBar(context, errorMsg);
+        ErrorHandler.showErrorSnackBar(context, 'Something went wrong. Please try again.');
       }
     }
   }
@@ -125,17 +104,16 @@ class _DownloadTabState extends State<DownloadTab> {
     await ErrorHandler.safeExecute(
           () async {
         final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
-        if (clipboardData?.text != null) {
+        if (clipboardData?.text != null && mounted) {
           setState(() {
             _urlController.text = clipboardData!.text!;
-            _clearError();
           });
         }
       },
           (errorMsg) {
         debugPrint('Clipboard error: $errorMsg');
         if (mounted) {
-          ErrorHandler.showErrorSnackBar(context, 'Failed to paste: $errorMsg');
+          ErrorHandler.showErrorSnackBar(context, 'Failed to paste from clipboard. Please try again.');
         }
       },
     );
@@ -150,7 +128,7 @@ class _DownloadTabState extends State<DownloadTab> {
         children: [
           UrlInputField(
             controller: _urlController,
-            onChanged: _clearError,
+            onChanged: () {}, // Empty function that takes no parameters
             onPastePressed: _pasteFromClipboard,
           ),
           const SizedBox(height: 16.0),
@@ -159,14 +137,6 @@ class _DownloadTabState extends State<DownloadTab> {
             text: 'Get Video Info',
             onPressed: _getVideoInfo,
           ),
-          if (_errorMessage.isNotEmpty) ...[
-            const SizedBox(height: 16.0),
-            Text(
-              _errorMessage,
-              style: TextStyle(color: Colors.red.shade700),
-              textAlign: TextAlign.center,
-            ),
-          ],
         ],
       ),
     );

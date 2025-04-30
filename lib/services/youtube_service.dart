@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:io';
+import 'package:flutter/cupertino.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:youtube_downloader/services/permissions_handler.dart';
 import 'package:youtube_downloader/services/storage_service.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_downloader/models/video_info.dart';
-
 import '../models/downloaded_video.dart';
 
 class YoutubeService {
@@ -100,24 +101,56 @@ class YoutubeService {
 
   static Future<String> getDownloadPath() async {
     Directory? directory;
+
     try {
       if (Platform.isAndroid) {
+        // Check if we have permission first
+        final hasPermission = await PermissionsHandler.checkStoragePermission();
+        if (!hasPermission) {
+          // Request permission if we don't have it
+          final granted = await PermissionsHandler.requestStoragePermission();
+          if (!granted) {
+            throw Exception('Storage permission not granted');
+          }
+        }
+
         directory = Directory('/storage/emulated/0/Download');
+
         if (!await directory.exists()) {
           directory = await getExternalStorageDirectory();
+          if (directory == null) {
+            throw Exception('Could not access external storage');
+          }
         }
       } else {
         directory = await getApplicationDocumentsDirectory();
       }
     } catch (e) {
+      debugPrint('Error accessing storage: $e');
       directory = await getTemporaryDirectory();
     }
 
     final path = '${directory!.path}/YouTubeDownloader';
     final dir = Directory(path);
+
     if (!await dir.exists()) {
-      await dir.create(recursive: true);
+      try {
+        await dir.create(recursive: true);
+      } catch (e) {
+        debugPrint('Error creating directory: $e');
+        throw Exception('Could not create download directory: $e');
+      }
     }
+
+    try {
+      final testFile = File('$path/.test_write_access');
+      await testFile.writeAsString('test');
+      await testFile.delete();
+    } catch (e) {
+      debugPrint('Write access test failed: $e');
+      throw Exception('No write access to download directory: $e');
+    }
+
     return path;
   }
 

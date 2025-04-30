@@ -4,6 +4,8 @@ import 'package:youtube_downloader/models/video_info.dart';
 import 'package:youtube_downloader/services/download_manager.dart';
 import 'package:youtube_downloader/utils/enums.dart';
 import 'package:youtube_downloader/screens/downloads_status_screen.dart';
+import 'package:youtube_downloader/services/permissions_handler.dart';
+import 'package:youtube_downloader/widgets/storage_permission_dialog.dart';
 
 class DownloadOptionsBottomSheet extends StatefulWidget {
   final VideoInfo videoInfo;
@@ -43,7 +45,6 @@ class _DownloadOptionsBottomSheetState extends State<DownloadOptionsBottomSheet>
 
   void _onTypeChanged(DownloadType? type) {
     if (type == null) return;
-
     setState(() {
       _selectedType = type;
       switch (type) {
@@ -94,8 +95,7 @@ class _DownloadOptionsBottomSheetState extends State<DownloadOptionsBottomSheet>
           ),
           ElevatedButton(
             onPressed: () {
-              Navigator.pop(context); // Close dialog
-              // Navigate to downloads screen
+              Navigator.pop(context);
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (context) => const DownloadsStatusScreen()),
@@ -108,20 +108,33 @@ class _DownloadOptionsBottomSheetState extends State<DownloadOptionsBottomSheet>
     );
   }
 
-  void _startDownload() async {
+  Future<void> _startDownload() async {
     if (_selectedStream == null) return;
+
+    final hasPermission = await PermissionsHandler.checkStoragePermission();
+    if (!hasPermission) {
+      final granted = await PermissionsHandler.requestStoragePermission();
+      if (!granted) {
+        if (context.mounted) {
+          await StoragePermissionDialog.showPermissionDialog(context);
+        }
+        return;
+      }
+    }
 
     final extension = _selectedStream!.container.name;
     final fileName = '${widget.videoInfo.sanitizedTitle}.$extension';
 
-    _downloadManager.startDownload(
+    await _downloadManager.startDownload(
       widget.videoInfo,
       _selectedStream!,
       fileName,
     );
 
-    Navigator.pop(context); // Close bottom sheet
-    _showDownloadStartedDialog(); // Show popup instead of snackbar
+    if (context.mounted) {
+      Navigator.pop(context);
+      _showDownloadStartedDialog();
+    }
   }
 
   String _formatFileSize(int bytes) {

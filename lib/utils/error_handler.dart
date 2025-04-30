@@ -3,12 +3,20 @@ import 'package:flutter/material.dart';
 
 class ErrorHandler {
   static String getErrorMessage(dynamic error) {
+    debugPrint('Original error: $error');
+
+    return 'Something went wrong. Please try again.';
+  }
+
+  static String getDetailedErrorMessage(dynamic error) {
+    if (error == null) {
+      return 'Unknown error occurred';
+    }
+
     if (error is TimeoutException) {
       return 'Connection timed out. Please try again.';
     } else if (error is FormatException) {
       return 'Invalid format. Please check your input.';
-    } else if (error == null) {
-      return 'Something went wrong. Please try again.';
     }
 
     final errorString = error.toString().toLowerCase();
@@ -29,37 +37,41 @@ class ErrorHandler {
   }
 
   static void showErrorSnackBar(BuildContext context, String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red.shade700,
-        behavior: SnackBarBehavior.floating,
-        duration: const Duration(seconds: 4),
-        action: SnackBarAction(
-          label: 'Dismiss',
-          textColor: Colors.white,
-          onPressed: () {
-            ScaffoldMessenger.of(context).hideCurrentSnackBar();
-          },
+    if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Something went wrong. Please try again.'),
+          backgroundColor: Colors.red.shade700,
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 4),
+          action: SnackBarAction(
+            label: 'Dismiss',
+            textColor: Colors.white,
+            onPressed: () {
+              ScaffoldMessenger.of(context).hideCurrentSnackBar();
+            },
+          ),
         ),
-      ),
-    );
+      );
+    }
   }
 
   static void showErrorDialog(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Error'),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
+    if (context.mounted) {
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Error'),
+          content: const Text('Something went wrong. Please try again.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   static Future<T?> safeExecute<T>(
@@ -69,8 +81,8 @@ class ErrorHandler {
     try {
       return await operation();
     } catch (e) {
-      final errorMessage = getErrorMessage(e);
-      onError(errorMessage);
+      debugPrint('Error caught in safeExecute: $e');
+      onError('Something went wrong. Please try again.');
       return null;
     }
   }

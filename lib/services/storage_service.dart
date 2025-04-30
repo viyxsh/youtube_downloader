@@ -8,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:youtube_downloader/services/youtube_service.dart';
 
 class StorageService {
-  static const String _videosKey = 'downloaded_videos';
+  static const String _videosKey = 'com.proj.tubesaver.downloaded_videos';
 
   // Save thumbnail from URL
   static Future<String> saveThumbnail(String url, String videoId) async {
@@ -30,13 +30,11 @@ class StorageService {
     }
   }
 
-  // Save video metadata
   static Future<void> saveVideoMetadata(DownloadedVideo video) async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final videoList = await getDownloadedVideoMetadata();
 
-      // Check if video already exists
       final existingIndex = videoList.indexWhere(
               (v) => path.basename(v.file.path) == path.basename(video.file.path)
       );
@@ -54,7 +52,6 @@ class StorageService {
     }
   }
 
-  // Get downloaded video metadata
   static Future<List<DownloadedVideo>> getDownloadedVideoMetadata() async {
     try {
       final prefs = await SharedPreferences.getInstance();
@@ -67,7 +64,7 @@ class StorageService {
       final jsonList = jsonDecode(jsonStr) as List;
       final videoList = jsonList
           .map((json) => DownloadedVideo.fromJson(json))
-          .where((video) => video.file.existsSync()) // Filter out deleted files
+          .where((video) => video.file.existsSync())
           .toList();
 
       return videoList;
@@ -77,15 +74,12 @@ class StorageService {
     }
   }
 
-  // Delete video and its metadata
   static Future<bool> deleteVideo(DownloadedVideo video) async {
     try {
-      // Delete the file
       if (await video.file.exists()) {
         await video.file.delete();
       }
 
-      // Delete the thumbnail if it exists
       if (video.thumbnailPath.isNotEmpty) {
         final thumbnailFile = File(video.thumbnailPath);
         if (await thumbnailFile.exists()) {
@@ -93,7 +87,6 @@ class StorageService {
         }
       }
 
-      // Update the metadata list
       final videoList = await getDownloadedVideoMetadata();
       videoList.removeWhere(
               (v) => path.basename(v.file.path) == path.basename(video.file.path)
@@ -110,7 +103,6 @@ class StorageService {
     }
   }
 
-  // Get downloaded videos (for backward compatibility)
   static Future<List<File>> getDownloadedVideos() async {
     try {
       final directory = await YoutubeService.getDownloadPath();
