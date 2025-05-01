@@ -13,64 +13,42 @@ class YoutubeService {
 
   static bool isValidYoutubeUrl(String url) {
     try {
-      var videoId = VideoId.parseVideoId(url);
-      return videoId != null;
-    } catch (e) {
+      Uri.parse(url);
+      return url.contains('youtube.com') || url.contains('youtu.be');
+    } catch (_) {
       return false;
     }
   }
 
   static Future<VideoInfo> getVideoInfo(String url) async {
     try {
-      debugPrint('Parsing video ID from URL: $url');
-      var videoId = VideoId.parseVideoId(url);
-      if (videoId == null) {
-        debugPrint('Parsed video ID is null');
-        throw ArgumentError('Invalid YouTube video ID');
-      }
-      debugPrint('Parsed video ID: $videoId');
+      debugPrint('Fetching video from URL: $url');
 
-      debugPrint('Fetching video metadata...');
-      final video = await _yt.videos.get(videoId);
-      debugPrint('Fetched video title: ${video.title}');
-      debugPrint('Author: ${video.author}');
-      debugPrint('Duration: ${video.duration}');
-      debugPrint('Thumbnail URL: ${video.thumbnails.highResUrl}');
+      final video = await _yt.videos.get(url);
+      final videoId = video.id.value;
 
-      StreamManifest manifest;
-      try {
-        debugPrint('Fetching stream manifest...');
-        manifest = await _yt.videos.streamsClient.getManifest(videoId);
-        debugPrint('Stream manifest fetched');
-      } catch (e, stack) {
-        debugPrint('Manifest fetch failed: $e');
-        debugPrint(stack.toString());
-        throw Exception(
-          'Unable to retrieve stream information. This video may be private, age-restricted, or blocked in your region.',
-        );
-      }
+      debugPrint('Fetched video: ${video.title} by ${video.author}');
+
+      final manifest = await _yt.videos.streams.getManifest(
+        videoId,
+        ytClients: [YoutubeApiClient.ios, YoutubeApiClient.android],
+      );
 
       final audioStreams = manifest.audioOnly.toList()
-        ..sort((a, b) => b.bitrate.bitsPerSecond.compareTo(a.bitrate.bitsPerSecond));
-      debugPrint('Audio-only streams count: ${audioStreams.length}');
+        ..sort((a, b) => b.bitrate.compareTo(a.bitrate));
 
       final videoStreams = manifest.muxed.toList()
         ..sort((a, b) => b.videoResolution.height.compareTo(a.videoResolution.height));
-      debugPrint('Muxed video streams count: ${videoStreams.length}');
 
       final videoOnlyStreams = manifest.videoOnly.toList()
         ..sort((a, b) => b.videoResolution.height.compareTo(a.videoResolution.height));
-      debugPrint('Video-only streams count: ${videoOnlyStreams.length}');
-
-      final duration = video.duration ?? Duration.zero;
-      debugPrint('Final duration used: $duration');
 
       return VideoInfo(
         id: videoId,
         title: video.title,
         author: video.author,
         thumbnailUrl: video.thumbnails.highResUrl,
-        duration: duration,
+        duration: video.duration ?? Duration.zero,
         audioStreams: audioStreams,
         videoStreams: videoStreams,
         videoOnlyStreams: videoOnlyStreams,
@@ -89,12 +67,12 @@ class YoutubeService {
     required VideoInfo videoInfo,
     required Function(double) onProgress,
   }) async {
-    final stream = _yt.videos.streamsClient.get(streamInfo);
+    final stream = _yt.videos.streams.get(streamInfo);
     final directory = await getDownloadPath();
     final file = File('$directory/$fileName');
 
     final fileStream = file.openWrite();
-    final total = streamInfo.size.totalBytes.toInt();
+    final total = streamInfo.size.totalBytes;
     int received = 0;
 
     await for (final data in stream) {
@@ -106,22 +84,19 @@ class YoutubeService {
     await fileStream.flush();
     await fileStream.close();
 
-    // Make sure thumbnailUrl is not null before saving
-    String? thumbnailPath;
+    String? thumbnailPath = '';
     if (videoInfo.thumbnailUrl.isNotEmpty) {
       thumbnailPath = await StorageService.saveThumbnail(
-          videoInfo.thumbnailUrl,
-          videoInfo.id
+        videoInfo.thumbnailUrl,
+        videoInfo.id,
       );
-    } else {
-      thumbnailPath = ''; // Provide a default empty string if no thumbnail URL
     }
 
     final downloadedVideo = DownloadedVideo(
       file: file,
       title: videoInfo.title,
       author: videoInfo.author,
-      thumbnailPath: thumbnailPath ?? '', // Use empty string as fallback if null
+      thumbnailPath: thumbnailPath ?? '',
       duration: videoInfo.duration,
     );
 
@@ -135,10 +110,8 @@ class YoutubeService {
 
     try {
       if (Platform.isAndroid) {
-        // Check if we have permission first
         final hasPermission = await PermissionsHandler.checkStoragePermission();
         if (!hasPermission) {
-          // Request permission if we don't have it
           final granted = await PermissionsHandler.requestStoragePermission();
           if (!granted) {
             throw Exception('Storage permission not granted');
@@ -161,7 +134,6 @@ class YoutubeService {
       directory = await getTemporaryDirectory();
     }
 
-    // Safely access directory path
     if (directory == null) {
       throw Exception('Could not find a suitable directory for downloads');
     }
