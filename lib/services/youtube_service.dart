@@ -22,38 +22,63 @@ class YoutubeService {
 
   static Future<VideoInfo> getVideoInfo(String url) async {
     try {
+      debugPrint('Parsing video ID from URL: $url');
       var videoId = VideoId.parseVideoId(url);
       if (videoId == null) {
+        debugPrint('Parsed video ID is null');
         throw ArgumentError('Invalid YouTube video ID');
       }
+      debugPrint('Parsed video ID: $videoId');
 
+      debugPrint('Fetching video metadata...');
       final video = await _yt.videos.get(videoId);
-      final manifest = await _yt.videos.streamsClient.getManifest(videoId);
+      debugPrint('Fetched video title: ${video.title}');
+      debugPrint('Author: ${video.author}');
+      debugPrint('Duration: ${video.duration}');
+      debugPrint('Thumbnail URL: ${video.thumbnails.highResUrl}');
 
-      // Extract and sort audio streams
+      StreamManifest manifest;
+      try {
+        debugPrint('Fetching stream manifest...');
+        manifest = await _yt.videos.streamsClient.getManifest(videoId);
+        debugPrint('Stream manifest fetched');
+      } catch (e, stack) {
+        debugPrint('Manifest fetch failed: $e');
+        debugPrint(stack.toString());
+        throw Exception(
+          'Unable to retrieve stream information. This video may be private, age-restricted, or blocked in your region.',
+        );
+      }
+
       final audioStreams = manifest.audioOnly.toList()
         ..sort((a, b) => b.bitrate.bitsPerSecond.compareTo(a.bitrate.bitsPerSecond));
+      debugPrint('Audio-only streams count: ${audioStreams.length}');
 
-      // Extract and sort muxed streams
       final videoStreams = manifest.muxed.toList()
         ..sort((a, b) => b.videoResolution.height.compareTo(a.videoResolution.height));
+      debugPrint('Muxed video streams count: ${videoStreams.length}');
 
-      // Extract and sort video-only streams
       final videoOnlyStreams = manifest.videoOnly.toList()
         ..sort((a, b) => b.videoResolution.height.compareTo(a.videoResolution.height));
+      debugPrint('Video-only streams count: ${videoOnlyStreams.length}');
+
+      final duration = video.duration ?? Duration.zero;
+      debugPrint('Final duration used: $duration');
 
       return VideoInfo(
         id: videoId,
         title: video.title,
         author: video.author,
         thumbnailUrl: video.thumbnails.highResUrl,
-        duration: video.duration ?? Duration.zero,
+        duration: duration,
         audioStreams: audioStreams,
         videoStreams: videoStreams,
         videoOnlyStreams: videoOnlyStreams,
       );
-    } finally {
-      // keep _yt open for downloading
+    } catch (e, stack) {
+      debugPrint('Error in getVideoInfo: $e');
+      debugPrint('Stack trace:\n$stack');
+      rethrow;
     }
   }
 

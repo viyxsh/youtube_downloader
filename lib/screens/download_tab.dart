@@ -56,7 +56,7 @@ class _DownloadTabState extends State<DownloadTab> {
             throw TimeoutException('Connection timed out. Please try again.');
           },
         );
-
+        print(videoInfo);
         // Only proceed if we have the necessary data and component is still mounted
         if (mounted && videoInfo != null) {
           setState(() {

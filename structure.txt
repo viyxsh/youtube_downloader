@@ -1,0 +1,420 @@
+.
+├── analysis_options.yaml
+├── android
+│   ├── app
+│   │   ├── build.gradle.kts
+│   │   └── src
+│   │       ├── debug
+│   │       │   └── AndroidManifest.xml
+│   │       ├── main
+│   │       │   ├── AndroidManifest.xml
+│   │       │   ├── java
+│   │       │   │   └── io
+│   │       │   │       └── flutter
+│   │       │   │           └── plugins
+│   │       │   │               └── GeneratedPluginRegistrant.java
+│   │       │   ├── kotlin
+│   │       │   │   └── com
+│   │       │   │       └── proj
+│   │       │   │           └── tubesaver
+│   │       │   │               └── MainActivity.kt
+│   │       │   └── res
+│   │       │       ├── drawable
+│   │       │       │   └── launch_background.xml
+│   │       │       ├── drawable-v21
+│   │       │       │   └── launch_background.xml
+│   │       │       ├── mipmap-hdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-mdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-xhdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-xxhdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── mipmap-xxxhdpi
+│   │       │       │   └── ic_launcher.png
+│   │       │       ├── values
+│   │       │       │   └── styles.xml
+│   │       │       └── values-night
+│   │       │           └── styles.xml
+│   │       └── profile
+│   │           └── AndroidManifest.xml
+│   ├── build.gradle.kts
+│   ├── gradle
+│   │   └── wrapper
+│   │       ├── gradle-wrapper.jar
+│   │       └── gradle-wrapper.properties
+│   ├── gradle.properties
+│   ├── gradlew
+│   ├── gradlew.bat
+│   ├── local.properties
+│   ├── settings.gradle.kts
+│   └── youtube_downloader_android.iml
+├── assets
+│   └── icons
+│       └── AppIcons
+│           ├── android
+│           │   ├── mipmap-hdpi
+│           │   │   └── ic_launcher.png
+│           │   ├── mipmap-mdpi
+│           │   │   └── ic_launcher.png
+│           │   ├── mipmap-xhdpi
+│           │   │   └── ic_launcher.png
+│           │   ├── mipmap-xxhdpi
+│           │   │   └── ic_launcher.png
+│           │   └── mipmap-xxxhdpi
+│           │       └── ic_launcher.png
+│           ├── appstore.png
+│           ├── Assets.xcassets
+│           │   └── AppIcon.appiconset
+│           │       ├── 100.png
+│           │       ├── 102.png
+│           │       ├── 1024.png
+│           │       ├── 108.png
+│           │       ├── 114.png
+│           │       ├── 120.png
+│           │       ├── 128.png
+│           │       ├── 144.png
+│           │       ├── 152.png
+│           │       ├── 16.png
+│           │       ├── 167.png
+│           │       ├── 172.png
+│           │       ├── 180.png
+│           │       ├── 196.png
+│           │       ├── 20.png
+│           │       ├── 216.png
+│           │       ├── 234.png
+│           │       ├── 256.png
+│           │       ├── 258.png
+│           │       ├── 29.png
+│           │       ├── 32.png
+│           │       ├── 40.png
+│           │       ├── 48.png
+│           │       ├── 50.png
+│           │       ├── 512.png
+│           │       ├── 55.png
+│           │       ├── 57.png
+│           │       ├── 58.png
+│           │       ├── 60.png
+│           │       ├── 64.png
+│           │       ├── 66.png
+│           │       ├── 72.png
+│           │       ├── 76.png
+│           │       ├── 80.png
+│           │       ├── 87.png
+│           │       ├── 88.png
+│           │       ├── 92.png
+│           │       └── Contents.json
+│           └── playstore.png
+├── ios
+│   ├── Flutter
+│   │   ├── AppFrameworkInfo.plist
+│   │   ├── Debug.xcconfig
+│   │   ├── flutter_export_environment.sh
+│   │   ├── Generated.xcconfig
+│   │   └── Release.xcconfig
+│   ├── Podfile
+│   ├── Podfile.lock
+│   ├── Pods
+│   │   ├── Headers
+│   │   ├── Local Podspecs
+│   │   │   ├── flutter_native_splash.podspec.json
+│   │   │   ├── Flutter.podspec.json
+│   │   │   ├── open_file_ios.podspec.json
+│   │   │   ├── package_info_plus.podspec.json
+│   │   │   ├── path_provider_foundation.podspec.json
+│   │   │   ├── permission_handler_apple.podspec.json
+│   │   │   ├── shared_preferences_foundation.podspec.json
+│   │   │   ├── sqflite_darwin.podspec.json
+│   │   │   ├── url_launcher_ios.podspec.json
+│   │   │   ├── video_player_avfoundation.podspec.json
+│   │   │   └── wakelock_plus.podspec.json
+│   │   ├── Pods.xcodeproj
+│   │   │   ├── project.pbxproj
+│   │   │   └── xcuserdata
+│   │   │       └── vijaysharma.xcuserdatad
+│   │   │           └── xcschemes
+│   │   │               ├── flutter_native_splash-flutter_native_splash_privacy.xcscheme
+│   │   │               ├── flutter_native_splash.xcscheme
+│   │   │               ├── Flutter.xcscheme
+│   │   │               ├── open_file_ios.xcscheme
+│   │   │               ├── package_info_plus-package_info_plus_privacy.xcscheme
+│   │   │               ├── package_info_plus.xcscheme
+│   │   │               ├── path_provider_foundation-path_provider_foundation_privacy.xcscheme
+│   │   │               ├── path_provider_foundation.xcscheme
+│   │   │               ├── permission_handler_apple-permission_handler_apple_privacy.xcscheme
+│   │   │               ├── permission_handler_apple.xcscheme
+│   │   │               ├── Pods-Runner.xcscheme
+│   │   │               ├── Pods-RunnerTests.xcscheme
+│   │   │               ├── shared_preferences_foundation-shared_preferences_foundation_privacy.xcscheme
+│   │   │               ├── shared_preferences_foundation.xcscheme
+│   │   │               ├── sqflite_darwin-sqflite_darwin_privacy.xcscheme
+│   │   │               ├── sqflite_darwin.xcscheme
+│   │   │               ├── url_launcher_ios-url_launcher_ios_privacy.xcscheme
+│   │   │               ├── url_launcher_ios.xcscheme
+│   │   │               ├── video_player_avfoundation-video_player_avfoundation_privacy.xcscheme
+│   │   │               ├── video_player_avfoundation.xcscheme
+│   │   │               ├── wakelock_plus-wakelock_plus_privacy.xcscheme
+│   │   │               ├── wakelock_plus.xcscheme
+│   │   │               └── xcschememanagement.plist
+│   │   └── Target Support Files
+│   │       ├── Flutter
+│   │       │   ├── Flutter.debug.xcconfig
+│   │       │   └── Flutter.release.xcconfig
+│   │       ├── flutter_native_splash
+│   │       │   ├── flutter_native_splash-dummy.m
+│   │       │   ├── flutter_native_splash-Info.plist
+│   │       │   ├── flutter_native_splash-prefix.pch
+│   │       │   ├── flutter_native_splash-umbrella.h
+│   │       │   ├── flutter_native_splash.debug.xcconfig
+│   │       │   ├── flutter_native_splash.modulemap
+│   │       │   ├── flutter_native_splash.release.xcconfig
+│   │       │   └── ResourceBundle-flutter_native_splash_privacy-flutter_native_splash-Info.plist
+│   │       ├── open_file_ios
+│   │       │   ├── open_file_ios-dummy.m
+│   │       │   ├── open_file_ios-Info.plist
+│   │       │   ├── open_file_ios-prefix.pch
+│   │       │   ├── open_file_ios-umbrella.h
+│   │       │   ├── open_file_ios.debug.xcconfig
+│   │       │   ├── open_file_ios.modulemap
+│   │       │   └── open_file_ios.release.xcconfig
+│   │       ├── package_info_plus
+│   │       │   ├── package_info_plus-dummy.m
+│   │       │   ├── package_info_plus-Info.plist
+│   │       │   ├── package_info_plus-prefix.pch
+│   │       │   ├── package_info_plus-umbrella.h
+│   │       │   ├── package_info_plus.debug.xcconfig
+│   │       │   ├── package_info_plus.modulemap
+│   │       │   ├── package_info_plus.release.xcconfig
+│   │       │   └── ResourceBundle-package_info_plus_privacy-package_info_plus-Info.plist
+│   │       ├── path_provider_foundation
+│   │       │   ├── path_provider_foundation-dummy.m
+│   │       │   ├── path_provider_foundation-Info.plist
+│   │       │   ├── path_provider_foundation-prefix.pch
+│   │       │   ├── path_provider_foundation-umbrella.h
+│   │       │   ├── path_provider_foundation.debug.xcconfig
+│   │       │   ├── path_provider_foundation.modulemap
+│   │       │   ├── path_provider_foundation.release.xcconfig
+│   │       │   └── ResourceBundle-path_provider_foundation_privacy-path_provider_foundation-Info.plist
+│   │       ├── permission_handler_apple
+│   │       │   ├── permission_handler_apple-dummy.m
+│   │       │   ├── permission_handler_apple-Info.plist
+│   │       │   ├── permission_handler_apple-prefix.pch
+│   │       │   ├── permission_handler_apple-umbrella.h
+│   │       │   ├── permission_handler_apple.debug.xcconfig
+│   │       │   ├── permission_handler_apple.modulemap
+│   │       │   ├── permission_handler_apple.release.xcconfig
+│   │       │   └── ResourceBundle-permission_handler_apple_privacy-permission_handler_apple-Info.plist
+│   │       ├── Pods-Runner
+│   │       │   ├── Pods-Runner-acknowledgements.markdown
+│   │       │   ├── Pods-Runner-acknowledgements.plist
+│   │       │   ├── Pods-Runner-dummy.m
+│   │       │   ├── Pods-Runner-frameworks-Debug-input-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Debug-output-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Profile-input-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Profile-output-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Release-input-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks-Release-output-files.xcfilelist
+│   │       │   ├── Pods-Runner-frameworks.sh
+│   │       │   ├── Pods-Runner-Info.plist
+│   │       │   ├── Pods-Runner-resources-Debug-input-files.xcfilelist
+│   │       │   ├── Pods-Runner-resources-Debug-output-files.xcfilelist
+│   │       │   ├── Pods-Runner-resources-Profile-input-files.xcfilelist
+│   │       │   ├── Pods-Runner-resources-Profile-output-files.xcfilelist
+│   │       │   ├── Pods-Runner-resources-Release-input-files.xcfilelist
+│   │       │   ├── Pods-Runner-resources-Release-output-files.xcfilelist
+│   │       │   ├── Pods-Runner-resources.sh
+│   │       │   ├── Pods-Runner-umbrella.h
+│   │       │   ├── Pods-Runner.debug.xcconfig
+│   │       │   ├── Pods-Runner.modulemap
+│   │       │   ├── Pods-Runner.profile.xcconfig
+│   │       │   └── Pods-Runner.release.xcconfig
+│   │       ├── Pods-RunnerTests
+│   │       │   ├── Pods-RunnerTests-acknowledgements.markdown
+│   │       │   ├── Pods-RunnerTests-acknowledgements.plist
+│   │       │   ├── Pods-RunnerTests-dummy.m
+│   │       │   ├── Pods-RunnerTests-Info.plist
+│   │       │   ├── Pods-RunnerTests-umbrella.h
+│   │       │   ├── Pods-RunnerTests.debug.xcconfig
+│   │       │   ├── Pods-RunnerTests.modulemap
+│   │       │   ├── Pods-RunnerTests.profile.xcconfig
+│   │       │   └── Pods-RunnerTests.release.xcconfig
+│   │       ├── shared_preferences_foundation
+│   │       │   ├── ResourceBundle-shared_preferences_foundation_privacy-shared_preferences_foundation-Info.plist
+│   │       │   ├── shared_preferences_foundation-dummy.m
+│   │       │   ├── shared_preferences_foundation-Info.plist
+│   │       │   ├── shared_preferences_foundation-prefix.pch
+│   │       │   ├── shared_preferences_foundation-umbrella.h
+│   │       │   ├── shared_preferences_foundation.debug.xcconfig
+│   │       │   ├── shared_preferences_foundation.modulemap
+│   │       │   └── shared_preferences_foundation.release.xcconfig
+│   │       ├── sqflite_darwin
+│   │       │   ├── ResourceBundle-sqflite_darwin_privacy-sqflite_darwin-Info.plist
+│   │       │   ├── sqflite_darwin-dummy.m
+│   │       │   ├── sqflite_darwin-Info.plist
+│   │       │   ├── sqflite_darwin-prefix.pch
+│   │       │   ├── sqflite_darwin-umbrella.h
+│   │       │   ├── sqflite_darwin.debug.xcconfig
+│   │       │   ├── sqflite_darwin.modulemap
+│   │       │   └── sqflite_darwin.release.xcconfig
+│   │       ├── url_launcher_ios
+│   │       │   ├── ResourceBundle-url_launcher_ios_privacy-url_launcher_ios-Info.plist
+│   │       │   ├── url_launcher_ios-dummy.m
+│   │       │   ├── url_launcher_ios-Info.plist
+│   │       │   ├── url_launcher_ios-prefix.pch
+│   │       │   ├── url_launcher_ios-umbrella.h
+│   │       │   ├── url_launcher_ios.debug.xcconfig
+│   │       │   ├── url_launcher_ios.modulemap
+│   │       │   └── url_launcher_ios.release.xcconfig
+│   │       ├── video_player_avfoundation
+│   │       │   ├── ResourceBundle-video_player_avfoundation_privacy-video_player_avfoundation-Info.plist
+│   │       │   ├── video_player_avfoundation-dummy.m
+│   │       │   ├── video_player_avfoundation-Info.plist
+│   │       │   ├── video_player_avfoundation-prefix.pch
+│   │       │   ├── video_player_avfoundation-umbrella.h
+│   │       │   ├── video_player_avfoundation.debug.xcconfig
+│   │       │   ├── video_player_avfoundation.modulemap
+│   │       │   └── video_player_avfoundation.release.xcconfig
+│   │       └── wakelock_plus
+│   │           ├── ResourceBundle-wakelock_plus_privacy-wakelock_plus-Info.plist
+│   │           ├── wakelock_plus-dummy.m
+│   │           ├── wakelock_plus-Info.plist
+│   │           ├── wakelock_plus-prefix.pch
+│   │           ├── wakelock_plus-umbrella.h
+│   │           ├── wakelock_plus.debug.xcconfig
+│   │           ├── wakelock_plus.modulemap
+│   │           └── wakelock_plus.release.xcconfig
+│   ├── Runner
+│   │   ├── AppDelegate.swift
+│   │   ├── Assets.xcassets
+│   │   │   ├── AppIcon.appiconset
+│   │   │   │   ├── 100.png
+│   │   │   │   ├── 102.png
+│   │   │   │   ├── 1024.png
+│   │   │   │   ├── 108.png
+│   │   │   │   ├── 114.png
+│   │   │   │   ├── 120.png
+│   │   │   │   ├── 128.png
+│   │   │   │   ├── 144.png
+│   │   │   │   ├── 152.png
+│   │   │   │   ├── 16.png
+│   │   │   │   ├── 167.png
+│   │   │   │   ├── 172.png
+│   │   │   │   ├── 180.png
+│   │   │   │   ├── 196.png
+│   │   │   │   ├── 20.png
+│   │   │   │   ├── 216.png
+│   │   │   │   ├── 234.png
+│   │   │   │   ├── 256.png
+│   │   │   │   ├── 258.png
+│   │   │   │   ├── 29.png
+│   │   │   │   ├── 32.png
+│   │   │   │   ├── 40.png
+│   │   │   │   ├── 48.png
+│   │   │   │   ├── 50.png
+│   │   │   │   ├── 512.png
+│   │   │   │   ├── 55.png
+│   │   │   │   ├── 57.png
+│   │   │   │   ├── 58.png
+│   │   │   │   ├── 60.png
+│   │   │   │   ├── 64.png
+│   │   │   │   ├── 66.png
+│   │   │   │   ├── 72.png
+│   │   │   │   ├── 76.png
+│   │   │   │   ├── 80.png
+│   │   │   │   ├── 87.png
+│   │   │   │   ├── 88.png
+│   │   │   │   ├── 92.png
+│   │   │   │   ├── Contents.json
+│   │   │   │   ├── Icon-App-1024x1024@1x.png
+│   │   │   │   ├── Icon-App-20x20@1x.png
+│   │   │   │   ├── Icon-App-20x20@2x.png
+│   │   │   │   ├── Icon-App-20x20@3x.png
+│   │   │   │   ├── Icon-App-29x29@1x.png
+│   │   │   │   ├── Icon-App-29x29@2x.png
+│   │   │   │   ├── Icon-App-29x29@3x.png
+│   │   │   │   ├── Icon-App-40x40@1x.png
+│   │   │   │   ├── Icon-App-40x40@2x.png
+│   │   │   │   ├── Icon-App-40x40@3x.png
+│   │   │   │   ├── Icon-App-60x60@2x.png
+│   │   │   │   ├── Icon-App-60x60@3x.png
+│   │   │   │   ├── Icon-App-76x76@1x.png
+│   │   │   │   ├── Icon-App-76x76@2x.png
+│   │   │   │   └── Icon-App-83.5x83.5@2x.png
+│   │   │   └── LaunchImage.imageset
+│   │   │       ├── Contents.json
+│   │   │       ├── LaunchImage.png
+│   │   │       ├── LaunchImage@2x.png
+│   │   │       ├── LaunchImage@3x.png
+│   │   │       └── README.md
+│   │   ├── Base.lproj
+│   │   │   ├── LaunchScreen.storyboard
+│   │   │   └── Main.storyboard
+│   │   ├── GeneratedPluginRegistrant.h
+│   │   ├── GeneratedPluginRegistrant.m
+│   │   ├── Info.plist
+│   │   └── Runner-Bridging-Header.h
+│   ├── Runner.xcodeproj
+│   │   ├── project.pbxproj
+│   │   ├── project.xcworkspace
+│   │   │   ├── contents.xcworkspacedata
+│   │   │   └── xcshareddata
+│   │   │       ├── IDEWorkspaceChecks.plist
+│   │   │       ├── swiftpm
+│   │   │       │   └── configuration
+│   │   │       └── WorkspaceSettings.xcsettings
+│   │   └── xcshareddata
+│   │       └── xcschemes
+│   │           └── Runner.xcscheme
+│   ├── Runner.xcworkspace
+│   │   ├── contents.xcworkspacedata
+│   │   └── xcshareddata
+│   │       ├── IDEWorkspaceChecks.plist
+│   │       ├── swiftpm
+│   │       │   └── configuration
+│   │       └── WorkspaceSettings.xcsettings
+│   └── RunnerTests
+│       └── RunnerTests.swift
+├── lib
+│   ├── components
+│   │   ├── components.dart
+│   │   ├── confirmation_dialog.dart
+│   │   ├── custom_app_bar.dart
+│   │   ├── download_task_card.dart
+│   │   ├── empty_content_placeholder.dart
+│   │   ├── loading_button.dart
+│   │   ├── url_input_field.dart
+│   │   └── video_card.dart
+│   ├── main.dart
+│   ├── models
+│   │   ├── downloaded_video.dart
+│   │   └── video_info.dart
+│   ├── screens
+│   │   ├── download_tab.dart
+│   │   ├── downloads_status_screen.dart
+│   │   ├── home_screen.dart
+│   │   ├── my_videos_tab.dart
+│   │   └── splash_screen.dart
+│   ├── services
+│   │   ├── download_manager.dart
+│   │   ├── permissions_handler.dart
+│   │   ├── storage_service.dart
+│   │   └── youtube_service.dart
+│   ├── theme
+│   │   └── theme.dart
+│   ├── utils
+│   │   ├── app_initialization.dart
+│   │   ├── enums.dart
+│   │   └── error_handler.dart
+│   └── widgets
+│       ├── download_options_bottom_sheet.dart
+│       └── storage_permission_dialog.dart
+├── pubspec.lock
+├── pubspec.yaml
+├── README.md
+├── structure.txt
+├── test
+│   └── widget_test.dart
+└── youtube_downloader.iml
+
+87 directories, 331 files
