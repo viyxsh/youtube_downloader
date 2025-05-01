@@ -95,7 +95,7 @@ class _DownloadTabState extends State<DownloadTab> {
         context: context,
         isScrollControlled: true,
         backgroundColor: Colors.transparent,
-        builder: (context) => DownloadOptionsBottomSheet(videoInfo: _videoInfo!),
+        builder: (context) => DownloadOptionsBottomSheet(videoInfo: _videoInfo!), // This is safe now because of the guard clause
       );
     } catch (e) {
       debugPrint('Error showing bottom sheet: $e');
@@ -111,7 +111,7 @@ class _DownloadTabState extends State<DownloadTab> {
         final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
         if (clipboardData?.text != null && mounted) {
           setState(() {
-            _urlController.text = clipboardData!.text!;
+            _urlController.text = clipboardData!.text!; // Safe because we check clipboardData?.text != null
           });
         }
       },

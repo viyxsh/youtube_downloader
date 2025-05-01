@@ -111,33 +111,106 @@ class _DownloadOptionsBottomSheetState extends State<DownloadOptionsBottomSheet>
   Future<void> _startDownload() async {
     if (_selectedStream == null) return;
 
+    debugPrint("DEBUG: Starting download process");
+
+    // Try to check permission first
     final hasPermission = await PermissionsHandler.checkStoragePermission();
+    debugPrint("DEBUG: Initial permission check result: $hasPermission");
+
+    // If we don't have permission, request it
     if (!hasPermission) {
+      debugPrint("DEBUG: Permission not granted, requesting now");
+
+      // Show the dialog first to explain why we need permission
+      if (context.mounted) {
+        await showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Storage Permission Required'),
+              content: const Text(
+                'TubeSaver needs permission to access your storage to download and save videos.',
+              ),
+              actions: <Widget>[
+                TextButton(
+                  child: const Text('Cancel'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+                TextButton(
+                  child: const Text('Continue'),
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                ),
+              ],
+            );
+          },
+        );
+      }
+
+      // Now request the actual permission
       final granted = await PermissionsHandler.requestStoragePermission();
+      debugPrint("DEBUG: Permission request result: $granted");
+
+      // If still not granted, show the settings dialog
       if (!granted) {
+        debugPrint("DEBUG: Permission denied after request, showing settings dialog");
         if (context.mounted) {
           await StoragePermissionDialog.showPermissionDialog(context);
+          return; // Exit the download flow
         }
-        return;
       }
     }
 
+    // Double-check permission after request
+    final finalCheck = await PermissionsHandler.checkStoragePermission();
+    debugPrint("DEBUG: Final permission check before download: $finalCheck");
+
+    if (!finalCheck) {
+      debugPrint("DEBUG: Permission still not granted after request, aborting download");
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Storage permission is required to download videos'),
+            duration: Duration(seconds: 3),
+          ),
+        );
+      }
+      return;
+    }
+
+    // We have permission, proceed with download
+    debugPrint("DEBUG: Permission granted, proceeding with download");
     final extension = _selectedStream!.container.name;
     final fileName = '${widget.videoInfo.sanitizedTitle}.$extension';
+    debugPrint("DEBUG: Download filename: $fileName");
 
-    await _downloadManager.startDownload(
-      widget.videoInfo,
-      _selectedStream!,
-      fileName,
-    );
+    try {
+      await _downloadManager.startDownload(
+        widget.videoInfo,
+        _selectedStream!,
+        fileName,
+      );
 
-    if (context.mounted) {
-      Navigator.pop(context);
-      _showDownloadStartedDialog();
+      if (context.mounted) {
+        Navigator.pop(context);
+        _showDownloadStartedDialog();
+      }
+    } catch (e) {
+      debugPrint("DEBUG: Error during download: $e");
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Download failed: ${e.toString()}'),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
-  }
-
-  String _formatFileSize(int bytes) {
+  }  String _formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
     return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';

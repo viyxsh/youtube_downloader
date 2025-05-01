@@ -13,7 +13,8 @@ class YoutubeService {
 
   static bool isValidYoutubeUrl(String url) {
     try {
-      return VideoId.parseVideoId(url) != null;
+      var videoId = VideoId.parseVideoId(url);
+      return videoId != null;
     } catch (e) {
       return false;
     }
@@ -21,7 +22,7 @@ class YoutubeService {
 
   static Future<VideoInfo> getVideoInfo(String url) async {
     try {
-      final videoId = VideoId.parseVideoId(url);
+      var videoId = VideoId.parseVideoId(url);
       if (videoId == null) {
         throw ArgumentError('Invalid YouTube video ID');
       }
@@ -60,7 +61,7 @@ class YoutubeService {
     required String videoId,
     required StreamInfo streamInfo,
     required String fileName,
-    required VideoInfo videoInfo, // Add videoInfo parameter
+    required VideoInfo videoInfo,
     required Function(double) onProgress,
   }) async {
     final stream = _yt.videos.streamsClient.get(streamInfo);
@@ -80,17 +81,22 @@ class YoutubeService {
     await fileStream.flush();
     await fileStream.close();
 
-    // Save thumbnail and metadata
-    final thumbnailPath = await StorageService.saveThumbnail(
-        videoInfo.thumbnailUrl,
-        videoInfo.id
-    );
+    // Make sure thumbnailUrl is not null before saving
+    String? thumbnailPath;
+    if (videoInfo.thumbnailUrl.isNotEmpty) {
+      thumbnailPath = await StorageService.saveThumbnail(
+          videoInfo.thumbnailUrl,
+          videoInfo.id
+      );
+    } else {
+      thumbnailPath = ''; // Provide a default empty string if no thumbnail URL
+    }
 
     final downloadedVideo = DownloadedVideo(
       file: file,
       title: videoInfo.title,
       author: videoInfo.author,
-      thumbnailPath: thumbnailPath,
+      thumbnailPath: thumbnailPath ?? '', // Use empty string as fallback if null
       duration: videoInfo.duration,
     );
 
@@ -130,7 +136,12 @@ class YoutubeService {
       directory = await getTemporaryDirectory();
     }
 
-    final path = '${directory!.path}/YouTubeDownloader';
+    // Safely access directory path
+    if (directory == null) {
+      throw Exception('Could not find a suitable directory for downloads');
+    }
+
+    final path = '${directory.path}/YouTubeDownloader';
     final dir = Directory(path);
 
     if (!await dir.exists()) {
