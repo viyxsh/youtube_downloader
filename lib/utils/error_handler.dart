@@ -40,7 +40,7 @@ class ErrorHandler {
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Something went wrong. Please try again.'),
+          content: Text(message),
           backgroundColor: Colors.red.shade700,
           behavior: SnackBarBehavior.floating,
           duration: const Duration(seconds: 4),
