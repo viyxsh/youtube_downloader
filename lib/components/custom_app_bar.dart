@@ -20,14 +20,24 @@ class CustomAppBar extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
+          // Left side spacer with the same width as the download button
+          SizedBox(width: 48.0),
+
+          // Centered title
+          Expanded(
+            child: Center(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
+
+          // Download button with badge
           Stack(
             children: [
               IconButton(

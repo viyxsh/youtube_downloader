@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:youtube_downloader/screens/download_tab.dart';
 import 'package:youtube_downloader/screens/my_videos_tab.dart';
 import 'package:youtube_downloader/screens/downloads_status_screen.dart';
@@ -22,6 +23,12 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
     _listenToDownloads();
+
+    // Set the status bar color to match the app bar
+    SystemChrome.setSystemUIOverlayStyle(const SystemUiOverlayStyle(
+      statusBarColor: Colors.blue, // Match your primary color
+      statusBarIconBrightness: Brightness.light, // White icons for blue background
+    ));
   }
 
   void _listenToDownloads() {
@@ -49,6 +56,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).primaryColor,
       body: SafeArea(
         child: Column(
           children: [
@@ -57,7 +65,7 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               child: Column(
                 children: [
                   CustomAppBar(
-                    title: 'YouTube Downloader',
+                    title: 'TubeSaver',
                     activeDownloads: _activeDownloads,
                     onDownloadsTap: _navigateToDownloadsScreen,
                   ),
@@ -78,12 +86,15 @@ class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateM
               ),
             ),
             Expanded(
-              child: TabBarView(
-                controller: _tabController,
-                children: const [
-                  DownloadTab(),
-                  MyVideosTab(),
-                ],
+              child: Container(
+                color: Colors.white,
+                child: TabBarView(
+                  controller: _tabController,
+                  children: const [
+                    DownloadTab(),
+                    MyVideosTab(),
+                  ],
+                ),
               ),
             ),
           ],
