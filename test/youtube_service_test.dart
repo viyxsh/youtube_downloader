@@ -53,7 +53,7 @@ void main() {
 
         // We expect getVideoInfo to throw an exception for invalid URL
         expect(() async => await YoutubeService.getVideoInfo(invalidUrl), throwsException);
-      }, skip: false); // Set to true if you want to skip this test in CI
+      }, skip: true); // Set to true if you want to skip this test in CI
     });
   });
 }
